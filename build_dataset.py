@@ -8,39 +8,28 @@ transcript_dir = "data/transcripts"
 data = []
 
 for file in os.listdir(transcript_dir):
-    if file.endswith(".json"):
-        rid = file.replace(".json", "")
+    if not file.endswith(".json"):
+        continue
 
-        transcript_path = os.path.join(transcript_dir, file)
-        audio_path = os.path.join(audio_dir, f"{rid}.wav")
+    rid = file.replace(".json", "")
+    transcript_path = os.path.join(transcript_dir, file)
+    audio_path = os.path.join(audio_dir, rid + ".wav")
 
-        # Skip if audio not found
-       # if not os.path.exists(audio_path):
-#     continue
+    with open(transcript_path, "r", encoding="utf-8") as f:
+        content = json.load(f)
 
-        try:
-            with open(transcript_path, "r", encoding="utf-8") as f:
-                content = json.load(f)
+    parts = []
+    for seg in content:
+        if seg.get("text", ""):
+            parts.append(seg["text"])
 
-            text = " ".join([seg.get("text", "") for seg in content]).strip()
+    text = " ".join(parts).strip()
 
-            # Skip empty text
-            if text == "":
-                continue
+    if text == "":
+        continue
 
-            data.append({
-                "audio_path": audio_path,
-                "text": text
-            })
+    data.append({"audio_path": audio_path, "text": text})
 
-        except Exception as e:
-            print(f"Error processing {file}: {e}")
-
-# Convert to DataFrame
 df = pd.DataFrame(data)
-
-# Save dataset
 df.to_csv("data/dataset.csv", index=False, encoding="utf-8")
-
-print("Dataset created successfully!")
-print(df.head())
+print("saved", len(df), "rows to data/dataset.csv")

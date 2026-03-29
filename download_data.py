@@ -1,26 +1,24 @@
+import os
+import json
+import requests
+
+
 def download_file(url, path):
     if os.path.exists(path):
-        print(f"Skipped: {path}")
+        print("skipped:", path)
         return
 
-    try:
-        r = requests.get(url, timeout=10)
-        if r.status_code == 200:
-            
-            # Validate JSON
-            if path.endswith(".json"):
-                try:
-                    json.loads(r.content)
-                except:
-                    print(f"Invalid JSON: {url}")
-                    return
+    r = requests.get(url, timeout=10)
+    if r.status_code == 200:
+        if path.endswith(".json"):
+            try:
+                json.loads(r.content)
+            except:
+                print("invalid json:", url)
+                return
 
-            with open(path, "wb") as f:
-                f.write(r.content)
-
-            print(f"Downloaded: {path}")
-        else:
-            print(f"Failed: {url}")
-
-    except Exception as e:
-        print(f"Error: {url} -> {e}")
+        with open(path, "wb") as f:
+            f.write(r.content)
+        print("downloaded:", path)
+    else:
+        print("failed:", url)

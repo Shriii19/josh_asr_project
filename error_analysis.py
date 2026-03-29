@@ -1,16 +1,16 @@
 import pandas as pd
 
-# Load predictions
 df = pd.read_csv("data/predictions.csv")
-
-# Remove empty rows
 df = df.dropna()
 df = df[df["prediction"] != ""]
+df = df[df["text"] != ""]
 
-# Take 25 samples
-sample = df.head(25)
+# keep only rows where prediction differs from reference
+errors = df[df["prediction"] != df["text"]]
 
-# Save file
+# take every Nth row so we get a spread across the dataset, not just the start
+step = max(1, len(errors) // 25)
+sample = errors.iloc[::step].head(25)
+
 sample.to_csv("data/error_samples.csv", index=False)
-
-print("✅ error_samples.csv created!")
+print("saved", len(sample), "error samples")
